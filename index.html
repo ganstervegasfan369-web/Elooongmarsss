@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Elongma + Doge Meme Shooter</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{margin:0;background:#0a0a12;color:#fff;font-family:sans-serif;text-align:center}
+    canvas{border:3px solid gold;border-radius:12px;margin-top:10px;background:#000022}
+    #score{font-size:22px;margin:10px}
+  </style>
+</head>
+<body>
+  <h2>Elongma 🚀 + Doge 🐶 vs Bear 🐻 on Mars 🌕</h2>
+  <p>Tap / Click / Space to shoot rockets 🚀</p>
+  <canvas id="gameCanvas" width="360" height="480"></canvas>
+  <div id="score">Score: 0</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+let score = 0;
+
+// player = Elongma block with Doge face 🐶
+const player = { x:40, y:360, w:60, h:60 };
+
+// arrays
+let rockets = [];
+let bears = [];
+
+// shoot rocket 🚀
+function shoot(){
+  rockets.push({x:player.x+player.w, y:player.y+player.h/2, emoji:"🚀"});
+}
+
+// input
+canvas.addEventListener("click", shoot);
+document.addEventListener("keydown", e => { if(e.code==="Space") shoot(); });
+
+// spawn bears 🐻
+setInterval(()=>{ 
+  bears.push({x:canvas.width+40,y:360,w:50,h:50,emoji:"🐻"});
+},1200);
+
+// loop
+function loop(){
+  ctx.fillStyle="#000022";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // background stars ✨
+  for(let i=0;i<20;i++){
+    ctx.fillStyle="white";
+    ctx.fillRect(Math.random()*canvas.width,Math.random()*200,2,2);
+  }
+
+  // Mars ground 🌕
+  ctx.fillStyle="#b33939";
+  ctx.fillRect(0,420,canvas.width,60);
+  ctx.font="28px serif";
+  ctx.fillText("🌕",10,440);
+
+  // draw player (Elongma with Doge)
+  ctx.fillStyle="orange";
+  ctx.fillRect(player.x,player.y,player.w,player.h);
+  ctx.font="36px serif";
+  ctx.fillText("🐶",player.x+10,player.y+40);
+
+  // rockets 🚀
+  for(let i=rockets.length-1;i>=0;i--){
+    let r=rockets[i];
+    r.x+=6;
+    ctx.font="28px serif";
+    ctx.fillText(r.emoji,r.x,r.y);
+    if(r.x>canvas.width) rockets.splice(i,1);
+  }
+
+  // bears 🐻
+  for(let i=bears.length-1;i>=0;i--){
+    let b=bears[i];
+    b.x-=2.5;
+    ctx.font="36px serif";
+    ctx.fillText(b.emoji,b.x,b.y+40);
+
+    // collision check
+    for(let j=rockets.length-1;j>=0;j--){
+      let r=rockets[j];
+      if(r.x< b.x+b.w && r.x> b.x && r.y> b.y && r.y< b.y+b.h){
+        rockets.splice(j,1);
+        bears.splice(i,1);
+        score++;
+        break;
+      }
+    }
+
+    if(b.x+b.w<0){
+      bears.splice(i,1);
+      score = Math.max(0,score-1);
+    }
+  }
+
+  // funny HUD emojis
+  document.getElementById("score").textContent="Score: "+score+" 🪙🤣";
+
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+  </html>
